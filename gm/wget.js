@@ -57,6 +57,8 @@ function wget( url, cb/*( dom, url, xhr )*/ ) {
 // (https://bugzilla.mozilla.org/show_bug.cgi?id=102699), so we need this hack:
 function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr ) {
   function loaded() {
+    iframe.removeEventListener("load", loaded, false);
+    doc.removeEventListener("DOMContentLoaded", loaded, false);
     var callbacks = cached.onload;
     delete cached.onload;
     //console.log("DOMContentLoaded of %x: cb %x", url, callbacks);
@@ -85,11 +87,20 @@ function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr ) {
   var doc = iframe.contentDocument;
   html2dom[url] = cached = { doc:doc, onload:[cb], xhr:xhr };
   doc.open("text/html");
+  iframe.addEventListener("load", loaded, false);
+  doc.addEventListener("DOMContentLoaded", loaded, false);
   doc.write(html); // this may throw weird errors we can't catch or silence :-|
   doc.close();
-
-  doc.addEventListener("DOMContentLoaded", loaded, false);
 }
+
+html2dom.destroy = function() {
+  for (var url in html2dom)
+    if (html2dom.hasOwnProperty(url)) {
+      var cache = html2dom[url];
+      cache.doc = cache.onload = cache.xhr = null;
+      delete html2dom[url];
+    }
+};
 
 // functionally belongs to html2dom above (see location.href line for details)
 try { // don't run this script recursively on wget() documents on other urls
@@ -99,3 +110,5 @@ try { // don't run this script recursively on wget() documents on other urls
 } catch(e) {
   //console.error("Double fire check error: %x", e);
 }
+
+window.addEventListener("unload", html2dom.destroy, false);
