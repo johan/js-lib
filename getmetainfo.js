@@ -5,16 +5,24 @@
 // with a microformat with a /html/head/link[@rel="next" and @href] and a
 // /html/head/meta[@name="items-xpath" and @content] tag.
 function getMetainfo(specs, doc) {
-  var info = {};
+  function getOne(tag, attr, doc) {
+    var node = $X('/html/head/'+ tag +'[@'+ find[tag] +'="' + attr +'"]', doc);
+    return node && node[pick[tag]];
+  }
   var find = { link: "rel", meta: "name" };
   var pick = { link: "href", meta: "content" };
+
+  if (typeof specs == "string")
+    return getOne.apply(this, [].slice.call(arguments));
+
+  var info = {};
   for (var tag in specs) {
-    var xpath = '/html/head/'+ tag +'[@'+ find[tag] +'="';
     var values = specs[tag];
     for (var i = 0; i < values.length; i++) {
-      var node = $X(xpath + values[i] +'"]', doc);
-      if (node)
-        info[values[i]] = node[pick[tag]];
+      var attr = values[i];
+      var value = getOne(tag, attr, doc);
+      if (value)
+        info[attr] = value;
     }
   }
   return info;
