@@ -21,19 +21,25 @@ function $X( xpath, root ) {
   return got instanceof Array ? got[0] : got;
 }
 
-function wget$x( url, cb/*( [DOMNodes], url, xhr )*/, xpath ) {
+
+// Fetches url, $x slices it up, and then invokes cb(nodes, url, dom, xhr)
+function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath ) {
   wget(url, function(xml, url, xhr) {
-    cb( $x( xpath, xml ), url, xhr );
+    cb( $x( xpath, xml ), url, xml, xhr );
   });
 }
 
-function wget$X( url, cb/*( [DOMNodes], url, xhr )*/, xpath ) {
+// Fetches url, $X slices it up, and then invokes cb(node, url, dom, xhr)
+function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath ) {
   wget(url, function(xml, url, xhr) {
-    cb( $X( xpath, xml ), url, xhr );
+    cb( $X( xpath, xml ), url, xml, xhr );
   });
 }
 
-function wget( url, cb/*( xml, url, xhr )*/ ) {
+// Fetches url, turns it into an HTML DOM, and then invokes cb(dom, url, xhr)
+function wget( url, cb/*( dom, url, xhr )*/ ) {
+  if (html2dom[url]) // cache hit?
+    return html2dom(null, cb, url);
   GM_xmlhttpRequest({ method:'GET', url:url, onload:function( xhr ) {
     if (xhr.responseXML)
       cb( xhr.responseXML, url, xhr );
@@ -42,20 +48,27 @@ function wget( url, cb/*( xml, url, xhr )*/ ) {
   }});
 }
 
+// Well-behaved browers (Opera, maybe WebKit) could use this simple function:
+// function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr ) {
+//   cb( (new DOMParser).parseFromString(html, "text/html"), url, xhr );
+// }
+
+// Firefox doesn't implement (new DOMParser).parseFromString(html, "text/html")
+// (https://bugzilla.mozilla.org/show_bug.cgi?id=102699), so we need this hack:
 function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr ) {
   function loaded() {
-    var callbacks = cache[url].onload;
-    delete cache[url].onload;
+    var callbacks = cached.onload;
+    delete cached.onload;
     console.log("DOMContentLoaded of %x: cb %x", url, callbacks);
-    callbacks.forEach(function(cb) { cb( doc, url, xhr ); });
+    callbacks.forEach(function(cb,i) { cb( doc, url, xhr ); });
   };
 
-  var cache = html2dom.cache || {};
-  if (cache[url])
-    if (cache[url].onload)
-      return cache[url].onload.push(cb);
+  var cached = html2dom[url]; // cache of all already loaded and rendered DOM:s
+  if (cached)
+    if (cached.onload)
+      return cached.onload.push(cb);
     else
-      return cb(cache[url].doc, cache[url].xhr, url);
+      return cb(cached.doc, cached.xhr, url);
 
   var iframe = document.createElement("iframe");
   iframe.style.height = iframe.style.width = "0";
@@ -70,18 +83,19 @@ function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr ) {
     replace(/<body(\s+[^="']*=("[^"]*"|'[^']*'|[^'"\s]\S*))*\s*onload=("[^"]*"|'[^']*'|[^"']\S*)/ig, "<body$1" );
 
   var doc = iframe.contentDocument;
-  cache[url] = { doc:doc, onload:[cb], xhr:xhr };
+  html2dom[url] = cached = { doc:doc, onload:[cb], xhr:xhr };
   doc.open("text/html");
-  doc.write(html);
+  doc.write(html); // this may throw weird errors we can't catch or silence :-|
   doc.close();
 
   doc.addEventListener("DOMContentLoaded", loaded, false);
-
-  html2dom.cache = cache;
 }
 
+// functionally belongs to html2dom above (see location.href line for details)
 try { // don't run this script recursively on wget() documents on other urls
   if (window.frameElement &&
       window.parent.location.href.replace(/#.*/, "") == location.href)
-    return;
-} catch(e) {}
+    return; // console.warn("Avoiding double firing on %x", location.href);
+} catch(e) {
+  //console.error("Double fire check error: %x", e);
+}
