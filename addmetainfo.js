@@ -7,7 +7,7 @@ function addMeta(name, content) {
 
 function addLink(rel, href) {
   var link = document.createElement("link");
-  meta.rel = rel;
-  meta.href = href;
+  link.rel = rel;
+  link.href = href;
   return document.documentElement.firstChild.appendChild(link);
 }
