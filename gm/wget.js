@@ -59,7 +59,7 @@ function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr ) {
   function loaded() {
     var callbacks = cached.onload;
     delete cached.onload;
-    console.log("DOMContentLoaded of %x: cb %x", url, callbacks);
+    //console.log("DOMContentLoaded of %x: cb %x", url, callbacks);
     callbacks.forEach(function(cb,i) { cb( doc, url, xhr ); });
   };
 
