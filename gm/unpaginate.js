@@ -1,7 +1,6 @@
 // writes the pagination microformat: http://userscripts.org/scripts/show/23175
 function unpaginate(items, next, pane) {
   function count(xpath) {
-    console.warn(xpath);
     return $X("count("+ xpath +")");
   }
 
