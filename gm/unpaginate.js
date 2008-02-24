@@ -4,7 +4,7 @@ function unpaginate(items, next, pane) {
   if (!$X("count("+ items +")") && !a)
     return; // neither items nor next link; abort!
   addMeta("items-xpath", items);
-  if ($X(pane) instanceof Node)
+  if (typeof $X(pane) == "object")
     addMeta("pagination-container", pane);
   if (a)
     addLink("next", a.href);
