@@ -5,7 +5,7 @@ function unpaginate(items, next, pane) {
   }
 
   if (typeof items == "string")
-    itens = [items];
+    items = [items];
   items = items.filter(count).shift();
 
   var a = $X(next);
