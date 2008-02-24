@@ -77,7 +77,10 @@ function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr, runGM ) {
     var callbacks = cached.onload;
     delete cached.onload;
     //console.log("DOMContentLoaded of %x: cb %x", url, callbacks);
-    callbacks.forEach(function(cb,i) { cb( doc, url, xhr ); });
+    setTimeout(function() { // avoid racing with GM's DOMContentLoaded callback
+      //console.log("Running %x callbacks", url);
+      callbacks.forEach(function(cb,i) { cb( doc, url, xhr ); });
+    }, 10);
   };
 
   var cached = html2dom[url]; // cache of all already loaded and rendered DOM:s
