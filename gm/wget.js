@@ -45,12 +45,12 @@ function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath, runGM ) {
 // the loaded document will first be processed by all GM scripts thatt apply.
 function wget( url, cb/*( dom, url, xhr )*/, runGM ) {
   if (html2dom[url]) // cache hit?
-    return html2dom(null, cb, url);
+    return html2dom(null, cb, url, null, runGM);
   GM_xmlhttpRequest({ method:'GET', url:url, onload:function( xhr ) {
     if (xhr.responseXML)
       cb( xhr.responseXML, url, xhr );
     else
-      html2dom( xhr.responseText, cb, url, xhr );
+      html2dom( xhr.responseText, cb, url, xhr, runGM );
   }});
 }
 
@@ -98,7 +98,7 @@ function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr, runGM ) {
   if (runGM && mayCommunicate(url, location.href))
     return iframe.src = url; // load through GM (should be cached due to xhr)
 
-  console.log("May not communicate; no GM scripts called!");
+  //console.log("May not communicate / GM scripts unwanted! (%x)", runGM);
   html = html.replace(/[\n\r]+/g, " "). // needed not freeze up(?!)
     replace(/<script.*?<\/script>/ig, ""). // no code execution on injection!
     replace(/<body(\s+[^="']*=("[^"]*"|'[^']*'|[^'"\s]\S*))*\s*onload=("[^"]*"|'[^']*'|[^"']\S*)/ig, "<body$1" );
