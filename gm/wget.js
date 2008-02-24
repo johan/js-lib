@@ -22,22 +22,28 @@ function $X( xpath, root ) {
 }
 
 
-// Fetches url, $x slices it up, and then invokes cb(nodes, url, dom, xhr)
-function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath ) {
+// Fetches url, $x slices it up, and then invokes cb(nodes, url, dom, xhr).
+// If runGM is set to true and the url is on the same domain as location.href,
+// the loaded document will first be processed by all GM scripts thatt apply.
+function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath, runGM ) {
   wget(url, function(xml, url, xhr) {
     cb( $x( xpath, xml ), url, xml, xhr );
   });
 }
 
-// Fetches url, $X slices it up, and then invokes cb(node, url, dom, xhr)
-function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath ) {
+// Fetches url, $X slices it up, and then invokes cb(node, url, dom, xhr).
+// If runGM is set to true and the url is on the same domain as location.href,
+// the loaded document will first be processed by all GM scripts thatt apply.
+function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath, runGM ) {
   wget(url, function(xml, url, xhr) {
     cb( $X( xpath, xml ), url, xml, xhr );
   });
 }
 
-// Fetches url, turns it into an HTML DOM, and then invokes cb(dom, url, xhr)
-function wget( url, cb/*( dom, url, xhr )*/ ) {
+// Fetches url, turns it into an HTML DOM, and then invokes cb(dom, url, xhr).
+// If runGM is set to true and the url is on the same domain as location.href,
+// the loaded document will first be processed by all GM scripts thatt apply.
+function wget( url, cb/*( dom, url, xhr )*/, runGM ) {
   if (html2dom[url]) // cache hit?
     return html2dom(null, cb, url);
   GM_xmlhttpRequest({ method:'GET', url:url, onload:function( xhr ) {
@@ -48,6 +54,14 @@ function wget( url, cb/*( dom, url, xhr )*/ ) {
   }});
 }
 
+function mayCommunicate(url1, url2) {
+  function beforePath(url) {
+    url = url.match(/^[^:]+:\/*[^\/]+/);
+    return url && url[0].toLowerCase();
+  }
+  return beforePath(url1) == beforePath(url2);
+}
+
 // Well-behaved browers (Opera, maybe WebKit) could use this simple function:
 // function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr ) {
 //   cb( (new DOMParser).parseFromString(html, "text/html"), url, xhr );
@@ -55,8 +69,9 @@ function wget( url, cb/*( dom, url, xhr )*/ ) {
 
 // Firefox doesn't implement (new DOMParser).parseFromString(html, "text/html")
 // (https://bugzilla.mozilla.org/show_bug.cgi?id=102699), so we need this hack:
-function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr ) {
+function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr, runGM ) {
   function loaded() {
+    doc = cached.doc = iframe.contentDocument;
     iframe.removeEventListener("load", loaded, false);
     doc.removeEventListener("DOMContentLoaded", loaded, false);
     var callbacks = cached.onload;
@@ -78,16 +93,18 @@ function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr ) {
   iframe.style.position = "absolute";
   document.body.appendChild(iframe);
 
-  iframe.contentWindow.location.href = url; // bypass cross domain issues
+  iframe.addEventListener("load", loaded, false);
+  html2dom[url] = cached = { onload:[cb], xhr:xhr };
+  if (runGM && mayCommunicate(url, location.href))
+    return iframe.src = url; // load through GM (should be cached due to xhr)
 
-  html = html.replace(/[\n\r]+/g, " ").
+  console.log("May not communicate; no GM scripts called!");
+  html = html.replace(/[\n\r]+/g, " "). // needed not freeze up(?!)
     replace(/<script.*?<\/script>/ig, ""). // no code execution on injection!
     replace(/<body(\s+[^="']*=("[^"]*"|'[^']*'|[^'"\s]\S*))*\s*onload=("[^"]*"|'[^']*'|[^"']\S*)/ig, "<body$1" );
-
+  iframe.contentWindow.location.href = location.href; // for cross domain issues
   var doc = iframe.contentDocument;
-  html2dom[url] = cached = { doc:doc, onload:[cb], xhr:xhr };
   doc.open("text/html");
-  iframe.addEventListener("load", loaded, false);
   doc.addEventListener("DOMContentLoaded", loaded, false);
   doc.write(html); // this may throw weird errors we can't catch or silence :-|
   doc.close();
