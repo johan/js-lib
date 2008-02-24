@@ -6,6 +6,6 @@ function unpaginate(items, next, pane) {
   addMeta("items-xpath", items);
   if (typeof $X(pane) == "object")
     addMeta("pagination-container", pane);
-  if (a)
+  if (a && a.href)
     addLink("next", a.href);
 }
