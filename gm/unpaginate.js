@@ -1,11 +1,21 @@
 // writes the pagination microformat: http://userscripts.org/scripts/show/23175
 function unpaginate(items, next, pane) {
+  function count(xpath) {
+    console.warn(xpath);
+    return $X("count("+ xpath +")");
+  }
+
+  if (typeof items == "string")
+    itens = [items];
+  items = items.filter(count).shift();
+
   var a = $X(next);
-  if (!$X("count("+ items +")") && !a)
-    return; // neither items nor next link; abort!
-  addMeta("items-xpath", items);
-  if (typeof $X(pane) == "object")
-    addMeta("pagination-container", pane);
-  if (a && a.href)
-    addLink("next", a.href);
+  if (a || items) {
+    //console.info("producing %x", location.href);
+    addMeta("items-xpath", items);
+    if (typeof $X(pane) == "object")
+      addMeta("pagination-container", pane);
+    if (a.href)
+      addLink("next", a.href);
+  }
 }
