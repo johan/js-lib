@@ -24,7 +24,7 @@ function $X( xpath, root ) {
 
 // Fetches url, $x slices it up, and then invokes cb(nodes, url, dom, xhr).
 // If runGM is set to true and the url is on the same domain as location.href,
-// the loaded document will first be processed by all GM scripts thatt apply.
+// the loaded document will first be processed by all GM scripts that apply.
 function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath, runGM ) {
   wget(url, function(xml, url, xhr) {
     cb( $x( xpath, xml ), url, xml, xhr );
@@ -33,7 +33,7 @@ function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath, runGM ) {
 
 // Fetches url, $X slices it up, and then invokes cb(node, url, dom, xhr).
 // If runGM is set to true and the url is on the same domain as location.href,
-// the loaded document will first be processed by all GM scripts thatt apply.
+// the loaded document will first be processed by all GM scripts that apply.
 function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath, runGM ) {
   wget(url, function(xml, url, xhr) {
     cb( $X( xpath, xml ), url, xml, xhr );
@@ -42,7 +42,7 @@ function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath, runGM ) {
 
 // Fetches url, turns it into an HTML DOM, and then invokes cb(dom, url, xhr).
 // If runGM is set to true and the url is on the same domain as location.href,
-// the loaded document will first be processed by all GM scripts thatt apply.
+// the loaded document will first be processed by all GM scripts that apply.
 function wget( url, cb/*( dom, url, xhr )*/, runGM ) {
   //console.log("Loading %x", url);
   if (html2dom[url]) // cache hit?
