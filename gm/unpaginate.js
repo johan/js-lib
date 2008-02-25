@@ -20,7 +20,7 @@ function unpaginate(items, next, pane) {
       addMeta("pagination-container", xpath);
     });
 
-    if (a.href) {
+    if (a && a.href) {
       addLink("next", a.href);
       addMeta("next-xpath", next);
     }
