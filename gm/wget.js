@@ -44,6 +44,7 @@ function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath, runGM ) {
 // If runGM is set to true and the url is on the same domain as location.href,
 // the loaded document will first be processed by all GM scripts thatt apply.
 function wget( url, cb/*( dom, url, xhr )*/, runGM ) {
+  //console.log("Loading %x", url);
   if (html2dom[url]) // cache hit?
     return html2dom(null, cb, url, null, runGM);
   GM_xmlhttpRequest({ method:'GET', url:url, onload:function( xhr ) {
@@ -91,7 +92,8 @@ function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr, runGM ) {
       return cb(cached.doc, cached.xhr, url);
 
   var iframe = document.createElement("iframe");
-  iframe.style.height = iframe.style.width = "0";
+  iframe.style.height = iframe.style.left = "0";
+  iframe.style.width = (innerWidth - 32)+"px";
   iframe.style.visibility = "hidden";
   iframe.style.position = "absolute";
   document.body.appendChild(iframe);
