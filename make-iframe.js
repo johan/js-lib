@@ -39,12 +39,10 @@ function makeFrame(cb/*(iframeTag, window, document)*/, name, debug) {
     cb( iframe, win, doc );
   }
 
-  var framename = typeof name != "undefined" ? (name ? "-"+name : name) :
-    makeFrame.id = (makeFrame.id || 0) - 1;
-  framename = "pane" + framename;
   var iframe = document.createElement("iframe");
   iframe.src = "about:blank";
-  iframe.name = framename;
+  iframe.name = typeof name != "undefined" ? name :
+    ("pane" + (makeFrame.id = (makeFrame.id || 0) - 1));
   iframe.setAttribute("style", "overflowY:hidden; overflowX:hidden; " +
                       "z-index:9999; border:0; margin:0; padding:0; " +
                       "top:auto; right:auto; bottom:auto; left:auto;");
