@@ -40,12 +40,12 @@ function makeFrame(cb/*(iframeTag, window, document)*/, name, debug) {
   }
 
   var iframe = document.createElement("iframe");
-  iframe.src = "about:blank";
-  iframe.name = typeof name != "undefined" ? name :
+  var framename = iframe.name = typeof name != "undefined" ? name :
     ("pane" + (makeFrame.id = (makeFrame.id || 0) - 1));
   iframe.setAttribute("style", "overflowY:hidden; overflowX:hidden; " +
                       "z-index:9999; border:0; margin:0; padding:0; " +
                       "top:auto; right:auto; bottom:auto; left:auto;");
+  iframe.src = "about:blank";
   iframe.addEventListener("load", done, true);
 
   var frames = makeFrame.data || {};
