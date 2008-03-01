@@ -22,9 +22,9 @@ var JSONP = {
 	sURL += "?";
       var last = /.$/.exec( sURL )[0];
       if (last != "=") {
-        if (last != '&' && last != "?")
+        if (last != "&" && last != "?")
 	  sURL += "&";
-        sURL += 'callback=';
+        sURL += "callback=";
       }
     }
 
