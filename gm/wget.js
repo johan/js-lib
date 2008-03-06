@@ -27,6 +27,8 @@ function $X( xpath, root ) {
 // the loaded document will first be processed by all GM scripts that apply. If
 // div is set to true and runGM is not, the DOMization will be via a div instead
 // of a frame (which munges the html, head and body tags), but saves resources.
+// Note when using div: use xpath expressions starting in "./", not "/", as the
+// root node is not connected. Also, the document passed to cb will be the div.
 function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath, runGM, div ) {
   wget(url, function(xml, url, xhr) {
     cb( $x( xpath, xml ), url, xml, xhr );
@@ -38,6 +40,8 @@ function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath, runGM, div ) {
 // the loaded document will first be processed by all GM scripts that apply.  If
 // div is set to true and runGM is not, the DOMization will be via a div instead
 // of a frame (which munges the html, head and body tags), but saves resources.
+// Note when using div: use xpath expressions starting in "./", not "/", as the
+// root node is not connected. Also, the document passed to cb will be the div.
 function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath, runGM, div ) {
   wget(url, function(xml, url, xhr) {
     cb( $X( xpath, xml ), url, xml, xhr );
