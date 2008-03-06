@@ -24,26 +24,32 @@ function $X( xpath, root ) {
 
 // Fetches url, $x slices it up, and then invokes cb(nodes, url, dom, xhr).
 // If runGM is set to true and the url is on the same domain as location.href,
-// the loaded document will first be processed by all GM scripts that apply.
-function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath, runGM ) {
+// the loaded document will first be processed by all GM scripts that apply. If
+// div is set to true and runGM is not, the DOMization will be via a div instead
+// of a frame (which munges the html, head and body tags), but saves resources.
+function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath, runGM, div ) {
   wget(url, function(xml, url, xhr) {
     cb( $x( xpath, xml ), url, xml, xhr );
-  });
+  }, runGM, div);
 }
 
 // Fetches url, $X slices it up, and then invokes cb(node, url, dom, xhr).
 // If runGM is set to true and the url is on the same domain as location.href,
-// the loaded document will first be processed by all GM scripts that apply.
-function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath, runGM ) {
+// the loaded document will first be processed by all GM scripts that apply.  If
+// div is set to true and runGM is not, the DOMization will be via a div instead
+// of a frame (which munges the html, head and body tags), but saves resources.
+function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath, runGM, div ) {
   wget(url, function(xml, url, xhr) {
     cb( $X( xpath, xml ), url, xml, xhr );
-  });
+    }, runGM, div);
 }
 
 // Fetches url, turns it into an HTML DOM, and then invokes cb(dom, url, xhr).
 // If runGM is set to true and the url is on the same domain as location.href,
-// the loaded document will first be processed by all GM scripts that apply.
-function wget( url, cb/*( dom, url, xhr )*/, runGM ) {
+// the loaded document will first be processed by all GM scripts that apply.  If
+// div is set to true and runGM is not, the DOMization will be via a div instead
+// of a frame (which munges the html, head and body tags), but saves resources.
+function wget( url, cb/*( dom, url, xhr )*/, runGM, div ) {
   //console.log("Loading %x", url);
   if (html2dom[url]) // cache hit?
     return html2dom(null, cb, url, null, runGM);
@@ -51,7 +57,7 @@ function wget( url, cb/*( dom, url, xhr )*/, runGM ) {
     if (xhr.responseXML)
       cb( xhr.responseXML, url, xhr );
     else
-      html2dom( xhr.responseText, cb, url, xhr, runGM );
+      html2dom( xhr.responseText, cb, url, xhr, runGM, div );
   }});
 }
 
@@ -70,7 +76,7 @@ function mayCommunicate(url1, url2) {
 
 // Firefox doesn't implement (new DOMParser).parseFromString(html, "text/html")
 // (https://bugzilla.mozilla.org/show_bug.cgi?id=102699), so we need this hack:
-function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr, runGM ) {
+function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr, runGM, div ) {
   function loaded() {
     doc = cached.doc = iframe.contentDocument;
     iframe.removeEventListener("load", loaded, false);
@@ -83,13 +89,24 @@ function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr, runGM ) {
       callbacks.forEach(function(cb,i) { cb( doc, url, xhr ); });
     }, 10);
   };
+  function wipeJavascript(html) {
+    return html.replace(/[\n\r]+/g, " "). // needed not freeze up(?!)
+      replace(/<script.*?<\/script>/ig, ""). // no code execution on injection!
+      replace(/<body(\s+[^="']*=("[^"]*"|'[^']*'|[^'"\s]\S*))*\s*onload=("[^"]*"|'[^']*'|[^"']\S*)/ig, "<body$1");
+  };
+
+  if (div && !runGM) {
+    var parent = document.createElement("div");
+    parent.innerHTML = wipeJavascript(html);
+    return setTimeout(cb, 10, parent, url); // hopefully render it first
+  }
 
   var cached = html2dom[url]; // cache of all already loaded and rendered DOM:s
   if (cached)
     if (cached.onload)
       return cached.onload.push(cb);
     else
-      return cb(cached.doc, cached.xhr, url);
+      return cb(cached.doc, url, cached.xhr);
 
   var iframe = document.createElement("iframe");
   iframe.style.height = iframe.style.left = "0";
@@ -104,9 +121,7 @@ function html2dom( html, cb/*( xml, url, xhr )*/, url, xhr, runGM ) {
     return iframe.src = url; // load through GM (should be cached due to xhr)
 
   //console.log("May not communicate / GM scripts unwanted! (%x)", runGM);
-  html = html.replace(/[\n\r]+/g, " "). // needed not freeze up(?!)
-    replace(/<script.*?<\/script>/ig, ""). // no code execution on injection!
-    replace(/<body(\s+[^="']*=("[^"]*"|'[^']*'|[^'"\s]\S*))*\s*onload=("[^"]*"|'[^']*'|[^"']\S*)/ig, "<body$1" );
+  html = wipeJavascript(html);
   iframe.contentWindow.location.href = location.href; // for cross domain issues
   var doc = iframe.contentDocument;
   doc.open("text/html");
