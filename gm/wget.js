@@ -57,7 +57,8 @@ function wget( url, cb/*( dom, url, xhr )*/, runGM, div ) {
   //console.log("Loading %x", url);
   if (html2dom[url]) // cache hit?
     return html2dom(null, cb, url, null, runGM);
-  GM_xmlhttpRequest({ method:'GET', url:url, onload:function( xhr ) {
+  var xhr = wget.xhr || GM_xmlhttpRequest;
+  xhr({ method:'GET', url:url, onload:function( xhr ) {
     if (xhr.responseXML)
       cb( xhr.responseXML, url, xhr );
     else
