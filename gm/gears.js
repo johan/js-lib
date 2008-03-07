@@ -10,13 +10,17 @@ try {
   console.warn("%x: exiting -- %x", location.href, e.message);
 }
 
+// like db.query, but only ever returns a single row
 db.one = function() {
   var got = db.query.apply(db, arguments);
   return got && got[0];
 };
 
+// First argument is the sql query string (splicing in data by way of "?"), rest
+// arguments are each positional ? map's value. (To batch insert, pass an Array
+// each successive remainder args set, and the sql will be iterated in turn.)
+// All operations will be performed against the database named db.db, or "data".
 db.query = function query(sql, args) {
-  if (!db) return null;
   var data = [], rs;
   var read = sql.match(/^SELECT/i);
   var write = sql.match/(/^INSERT/i) && "object" == typeof array;
@@ -24,7 +28,7 @@ db.query = function query(sql, args) {
     args = [[].slice.call(arguments, 1)];
   try {
     //console.info( "Query: %x %x", sql, args );
-    db.open("data");
+    db.open(db.db || "data");
     if (!read) db.execute("BEGIN").close();
 
     while (args.length) // execute one or more queries
