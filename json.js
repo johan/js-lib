@@ -1,3 +1,5 @@
+// @require http://ecmanaut.googlecode.com/svn/trunk/lib/isodate.js
+
 var JSON = (function() {
   function decode(json) { // based on http://www.json.org/json2.js of 2008-02-14
     if (/^[\],:{}\s]*$/.test(text.replace(/\\./g, '@').replace(
