@@ -2,10 +2,10 @@
 
 var JSON = (function() {
   function decode(json) { // based on http://www.json.org/json2.js of 2008-02-14
-    if (/^[\],:{}\s]*$/.test(text.replace(/\\./g, '@').replace(
+    if (/^[\],:{}\s]*$/.test(json.replace(/\\./g, '@').replace(
       /"[^\x22\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
       ']').replace(/(?:^|:|,)(?:\s*\[)+/g, "")))
-      return eval("("+ text +")");
+      return eval("("+ json +")");
     throw new SyntaxError('JSON.parse');
   }
 
