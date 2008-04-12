@@ -6,7 +6,7 @@ var JSON = (function() {
       /"[^\x22\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
       ']').replace(/(?:^|:|,)(?:\s*\[)+/g, "")))
       return eval("("+ json +")");
-    throw new SyntaxError('JSON.parse');
+    throw new SyntaxError('JSON.debug');
   }
 
   function encode(v) {
