@@ -45,7 +45,7 @@ function wget$x( url, cb/*( [DOMNodes], url, dom, xhr )*/, xpath, runGM, div ) {
 function wget$X( url, cb/*( DOMNode, url, dom, xhr )*/, xpath, runGM, div ) {
   wget(url, function(xml, url, xhr) {
     cb( $X( xpath, xml ), url, xml, xhr );
-    }, runGM, div);
+  }, runGM, div);
 }
 
 // Fetches url, turns it into an HTML DOM, and then invokes cb(dom, url, xhr).
@@ -57,13 +57,16 @@ function wget( url, cb/*( dom, url, xhr )*/, runGM, div ) {
   //console.log("Loading %x", url);
   if (html2dom[url]) // cache hit?
     return html2dom(null, cb, url, null, runGM);
-  var xhr = wget.xhr || GM_xmlhttpRequest;
-  xhr({ method:'GET', url:url, onload:function( xhr ) {
+  var xhr = { method:'GET', url:url, onload:function( xhr ) {
     if (xhr.responseXML)
       cb( xhr.responseXML, url, xhr );
     else
       html2dom( xhr.responseText, cb, url, xhr, runGM, div );
-  }});
+  }};
+  if (wget.xhr)
+    wget.xhr(xhr);
+  else
+    GM_xmlhttpRequest(xhr);
 }
 
 function mayCommunicate(url1, url2) {
