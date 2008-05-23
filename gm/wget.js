@@ -151,7 +151,7 @@ html2dom.destroy = function() {
 try { // don't run this script recursively on wget() documents on other urls
   if (window.frameElement &&
       window.parent.location.href.replace(/#.*/, "") == location.href)
-    return; // console.warn("Avoiding double firing on %x", location.href);
+    throw (new Error("wget.js: Avoiding double firing on " + location.href));
 } catch(e) {
   //console.error("Double fire check error: %x", e);
 }
