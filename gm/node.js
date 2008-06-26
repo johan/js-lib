@@ -18,9 +18,9 @@ return function node(opt) {
     var xml = tag.toXMLString && tag.toXMLString();
     if (xml) {
       tag = document.createElement("div");
-      t.innerHTML = xml;
+      tag.innerHTML = xml;
       var r = document.createRange();
-      r.selectNodeContents(t);
+      r.selectNodeContents(tag);
       tag = r.extractContents();
       if (tag.childNodes.length == 1)
         tag = tag.firstChild;
