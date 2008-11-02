@@ -6,6 +6,6 @@
 // Typical usage: unsafeWindow.foo = safeWrap(foo);
 function safeWrap(f) {
   return function() {
-    setTimeout.apply(window, [f, 0].concat([].slice.call(arguments, 1)));
+    setTimeout.apply(window, [f, 0].concat([].slice.call(arguments)));
   };
 }
