@@ -11,11 +11,13 @@ function unpaginate(items, next, pane) {
 
   items = arrayify(items).filter(count).shift();
 
-  var a = $X(next);
+  var links = $X(pane);
+  var a = $X(next, links || undefined);
   if (a || items) {
     //console.info("producing %x", location.href);
     addMeta("items-xpath", items);
 
+    // if one (or more) pagination panels matching @pane exist, meta each one:
     arrayify(pane).filter(count).forEach(function(xpath) {
       addMeta("pagination-container", xpath);
     });
