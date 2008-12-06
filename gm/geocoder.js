@@ -50,10 +50,9 @@ function aid(geocoder) {
       cb(pt);
     }
 
-    function point(coords) {
-      var lat, lng;
-      [lat, lng] = coords.split(",").map(function(s) parseInt(s, 10));
-      return new GPoint(lat, lng);
+    function latlong(coords) {
+      var c = coords.split(",");
+      return new GLatLng(parseFloat(c[0]), parseFloat(c[1]));
     }
 
     var Cache = gm_cache;
@@ -64,7 +63,7 @@ function aid(geocoder) {
         Cache = Cache[part];
       else
         return geocoder.getLatLng(adr, populateGeocache);
-    cb(point(Cache)); // leaf being the coordinate pair
+    cb(latlong(Cache)); // leaf being the coordinate pair
   }
 
   var aidedGeocoder = {};
