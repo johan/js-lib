@@ -39,6 +39,9 @@ function aid(geocoder) {
         do {
           if (!Cache.hasOwnProperty(part))
             Cache[part] = {};
+          if ("object" != typeof Cache[part] && parts.length) {
+            Cache[part] = { "": Cache[part] };
+          }
           store = Cache;
           Cache = Cache[part];
           key = part;
@@ -63,6 +66,8 @@ function aid(geocoder) {
         Cache = Cache[part];
       else
         return geocoder.getLatLng(adr, populateGeocache);
+    if ("object" == typeof Cache)
+      Cache = Cache[""];
     cb(latlong(Cache)); // leaf being the coordinate pair
   }
 
