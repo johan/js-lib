@@ -75,7 +75,7 @@ function aid(geocoder) {
 // geocodes a list of addresses, firing onOk callback for each resolved point,
 // onErr for the others. The callback is just fired once per unique address,
 // the more common addresses being enqueued first. onDone, if provided, gets
-// called with how many ms the lookup batch took.
+// called with the addr-to-latlong map, and how many ms the lookup batch took.
 function geocode(list, onOk/* point, adr */, onErr/* adr */, onDone/* ms */) {
   // uniquifies a list, with the most frequent items sorted on top
   function uniquify(list) {
@@ -88,24 +88,24 @@ function geocode(list, onOk/* point, adr */, onErr/* adr */, onDone/* ms */) {
     return list.sort(function(a, b) { return count[b] - count[a]; })
   }
 
-  function gotCoord(point) {
-    cache[place] = point;
-    if (!point) {
+  function gotCoord(latlng) {
+    cache[place] = latlng;
+    if (!latlng) {
       onErr && onErr(place);
     } else {
-      onOk && onOk(point, place);
+      onOk && onOk(latlng, place);
     }
     if (list.length)
       lookupNext();
     else if (onDone)
-      onDone((new Date) - start);
+      onDone(cache, (new Date) - start);
   }
 
   function lookupNext() {
-    geocoder.getLatLng(list.shift(), gotCoord);
+    geocoder.getLatLng(place = list.shift(), gotCoord);
   }
 
-  var place;
+  var place, cache = {};
   var start = new Date;
   if (!list.length) return;
   list = uniquify(list);
