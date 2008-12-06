@@ -64,7 +64,7 @@ function aid(geocoder) {
         Cache = Cache[part];
       else
         return geocoder.getLatLng(adr, populateGeocache);
-    return point(Cache); // leaf being the coordinate pair
+    cb(point(Cache)); // leaf being the coordinate pair
   }
 
   var aidedGeocoder = {};
