@@ -67,7 +67,10 @@ function aid(geocoder) {
       else
         return geocoder.getLatLng(adr, populateGeocache);
     if ("object" == typeof Cache)
-      Cache = Cache[""];
+      if (Cache.hasOwnProperty(""))
+        Cache = Cache[""];
+      else
+        return geocoder.getLatLng(adr, populateGeocache);
     cb(latlong(Cache)); // leaf being the coordinate pair
   }
 
