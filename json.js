@@ -22,7 +22,7 @@ if ("undefined" == typeof JSON) JSON = (function() {
       if (v instanceof Date)	return isodate(v);
 
       var o = ["{"], m, V;
-      for (i in v) {
+      for (var i in v) {
         if (v.hasOwnProperty(i)) {
           V = v[i];
           switch (typeof V) {
@@ -35,9 +35,9 @@ if ("undefined" == typeof JSON) JSON = (function() {
               o.push(encode(i), ":", encode(V));
           }
         }
-        o.push("}");
-        return o.join("");
       }
+      o.push("}");
+      return o.join("");
     }
     return undefined;
   }
