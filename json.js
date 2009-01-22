@@ -1,6 +1,6 @@
 // @require http://ecmanaut.googlecode.com/svn/trunk/lib/isodate.js
 
-var JSON = (function() {
+if ("undefined" == typeof JSON) JSON = (function() {
   function decode(json) { // based on http://www.json.org/json2.js of 2008-02-14
     if (/^[\],:{}\s]*$/.test(json.replace(/\\./g, '@').replace(
       /"[^\x22\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
@@ -39,6 +39,7 @@ var JSON = (function() {
         return o.join("");
       }
     }
+    return undefined;
   }
 
   function array(a) {
@@ -75,5 +76,8 @@ var JSON = (function() {
   var m = { "\n": "\\n", "\r": "\\r", "\t": "\\t", "\b": "\\b", "\f": "\\f",
             '"' : '\\"', "\\": "\\\\" };
 
-  return { encode: encode, decode:decode };
-})();
+  return { encode: encode, decode:decode, stringify: encode, parse: decode };
+})(); else {
+  JSON.encode = JSON.stringify;
+  JSON.decode = JSON.parse;
+}
