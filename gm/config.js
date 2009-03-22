@@ -19,7 +19,7 @@ var config = (function(data) {
         list.push(id);
     return list;
   }
-  function delete(id) {
+  function remove(id) {
     if (/function|object/.test(typeof id)) {
       var value = [], re = id;
       for (id in data)
@@ -33,5 +33,5 @@ var config = (function(data) {
     }
     return value;
   }
-  return { get:get, set:set, keys:keys, delete:delete };
+  return { get:get, set:set, keys:keys, remove:remove };
 })(eval(GM_getValue("config", "({})")));
