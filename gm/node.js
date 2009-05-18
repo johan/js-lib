@@ -11,11 +11,11 @@ return function node(opt) {
     return value;
   }
 
-  var id = attr("id");
-  var tag = $(id);
+  var id = attr("id"), tag = id && $(id);
+  var html = attr("html"), text = attr("text");
   if (!tag) {
-    tag = attr("tag") || document.createElement("div");
-    var xml = tag.toXMLString && tag.toXMLString();
+    tag = attr("tag");
+    var xml = tag && tag.toXMLString && tag.toXMLString();
     if (xml) {
       tag = document.createElement("div");
       tag.innerHTML = xml;
@@ -24,6 +24,11 @@ return function node(opt) {
       tag = r.extractContents();
       if (tag.childNodes.length == 1)
         tag = tag.firstChild;
+    } else if ("string" == typeof text) {
+      tag = document.createTextNode(text);
+      text = undefined;
+    } else {
+      tag = document.createElement("div");
     }
 
     var after = attr("after"), replace = attr("replace");
@@ -43,8 +48,8 @@ return function node(opt) {
     if (id) tag.id = id;
   }
 
-  var html = attr("html"); if ("string" == typeof html) tag.innerHTML = html;
-  var text = attr("text"); if ("string" == typeof text) tag.textContent = text;
+  if ("string" == typeof html) tag.innerHTML = html;
+  if ("string" == typeof text) tag.textContent = text;
 
   var style = attr("style");
   if (style)
